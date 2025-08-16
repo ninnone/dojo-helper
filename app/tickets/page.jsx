@@ -1,7 +1,23 @@
 import React, { Suspense } from "react";
 import TicketList from "./TicketList";
 import Loading from "./loading";
-const Tickets = () => {
+
+const Tickets = async () => {
+  async function getTickets() {
+    await new Promise((resolve) => setTimeout(resolve, 3000));
+
+    const res = await fetch("http://localhost:4000/tickets", {
+      next: {
+        revalidate: 30,
+      },
+    });
+    console.log("running");
+
+    return res.json();
+  }
+
+  const tickets = await getTickets();
+
   return (
     <main>
       <nav>
@@ -13,7 +29,7 @@ const Tickets = () => {
         </div>
       </nav>
       <Suspense fallback={<Loading />}>
-        <TicketList />
+        <TicketList tickets={tickets} />
       </Suspense>
     </main>
   );

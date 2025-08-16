@@ -2,12 +2,15 @@
 import react from "react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { noStore } from "next/cache";
 
 export default function CreateForm() {
   const router = useRouter();
 
-  const [title, setTitle] = useState("");
-  const [body, setBody] = useState("");
+  const [formData, setFormData] = useState({
+    title: "",
+    body: "",
+  });
   const [priority, setPriority] = useState("low");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -16,12 +19,12 @@ export default function CreateForm() {
     setIsLoading(true);
 
     const ticket = {
-      title,
-      body,
+      ...formData,
       priority,
       user_email: "mario@netninja.dev",
     };
 
+    noStore();
     const res = await fetch("http://localhost:4000/tickets", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -29,6 +32,11 @@ export default function CreateForm() {
     });
 
     if (res.status === 201) {
+      // router.refresh();
+      setFormData({
+        title: "",
+        body: "",
+      });
       router.push("/tickets");
     }
   };
@@ -40,16 +48,16 @@ export default function CreateForm() {
         <input
           required
           type="text"
-          onChange={(e) => setTitle(e.target.value)}
-          value={title}
+          onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+          value={formData.title}
         />
       </label>
       <label>
-        <span> Title:</span>
+        <span> body</span>
         <textarea
           required
-          onChange={(e) => setBody(e.target.value)}
-          value={body}
+          onChange={(e) => setFormData({ ...formData, body: e.target.value })}
+          value={formData.body}
         />
       </label>
       <label>
